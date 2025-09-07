@@ -1,2 +1,2 @@
 # scrapp_backend
-BAkend for scrapp
+Backend for scrapp
