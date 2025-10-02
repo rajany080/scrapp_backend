@@ -1,0 +1,83 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "description": "This is the backend API for Scrapp application built with Gin",
+        "title": "Scrapp Backend API",
+        "contact": {},
+        "version": "1.0"
+    },
+    "host": "localhost:8090",
+    "basePath": "/",
+    "paths": {
+        "/ping": {
+            "get": {
+                "description": "Returns pong to verify the API is running",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "health"
+                ],
+                "summary": "Health check endpoint",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.PingResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/scrapp/{userId}": {
+            "get": {
+                "description": "Retrieves scrapp data for a specific user",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "scrapp"
+                ],
+                "summary": "Get user scrapp data",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "User ID",
+                        "name": "userId",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/main.UserScrappResponse"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "main.PingResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                }
+            }
+        },
+        "main.UserScrappResponse": {
+            "type": "object",
+            "properties": {
+                "message": {
+                    "type": "string"
+                },
+                "userId": {
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

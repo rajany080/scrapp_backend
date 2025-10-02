@@ -1,0 +1,54 @@
+basePath: /
+definitions:
+  main.PingResponse:
+    properties:
+      message:
+        type: string
+    type: object
+  main.UserScrappResponse:
+    properties:
+      message:
+        type: string
+      userId:
+        type: string
+    type: object
+host: localhost:8090
+info:
+  contact: {}
+  description: This is the backend API for Scrapp application built with Gin
+  title: Scrapp Backend API
+  version: "1.0"
+paths:
+  /ping:
+    get:
+      description: Returns pong to verify the API is running
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.PingResponse'
+      summary: Health check endpoint
+      tags:
+      - health
+  /scrapp/{userId}:
+    get:
+      description: Retrieves scrapp data for a specific user
+      parameters:
+      - description: User ID
+        in: path
+        name: userId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/main.UserScrappResponse'
+      summary: Get user scrapp data
+      tags:
+      - scrapp
+swagger: "2.0"
