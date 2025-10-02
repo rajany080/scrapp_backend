@@ -11,53 +11,12 @@ import (
 	"github.com/joho/godotenv"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"github.com/rajany080/scrapp_backend/routes"
+
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
-
-// @title       Scrapp Backend API
-// @version     1.0
-// @description This is the backend API for Scrapp application built with Gin
-// @host        localhost:8090
-// @BasePath    /
-
-// PingResponse represents the response for ping endpoint
-type PingResponse struct {
-	Message string `json:"message"`
-}
-
-// UserScrappResponse represents the response for user scrapp endpoint
-type UserScrappResponse struct {
-	Message string `json:"message"`
-	UserID  string `json:"userId"`
-}
-
-// Ping godoc
-// @Summary      Health check endpoint
-// @Description  Returns pong to verify the API is running
-// @Tags         health
-// @Produce      json
-// @Success      200  {object}  PingResponse
-// @Router       /ping [get]
-func pingHandler(c *gin.Context) {
-	c.JSON(200, PingResponse{
-		Message: "pong",
-	})
-}
-
-// GetUserScrapp godoc
-// @Summary      Get user scrapp data
-// @Description  Retrieves scrapp data for a specific user
-// @Tags         scrapp
-// @Produce      json
-// @Param        userId   path      string  true  "User ID"
-// @Success      200      {object}  UserScrappResponse
-// @Router       /scrapp/{userId} [get]
-func getUserScrappHandler(ctx *gin.Context) {
-	userId := ctx.Param("userId")
-	ctx.JSON(200, UserScrappResponse{
-		Message: "Successfully hit the message",
-		UserID:  userId,
-	})
-}
 
 func main() {
 	// Load the env file
@@ -68,14 +27,21 @@ func main() {
 
 	port := os.Getenv("PORT")
 
+	dsn := "host=localhost user=postgres password=test dbname=postgres port=5432 sslmode=disable"
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		log.Fatal("Error connecting to the database")
+	}
+	fmt.Println("Database connected!", db)
+
 	router := gin.Default()
 
 	// Swagger route
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	// API routes
-	router.GET("/ping", pingHandler)
-	router.GET("/scrapp/:userId", getUserScrappHandler)
+	// User routes
+	apiGroup := router.Group("/api")
+	routes.UserRoutes(apiGroup)
 
 	// Start server on the configured port
 	serverAddr := ":" + port
