@@ -1,47 +1,172 @@
-basePath: /
 definitions:
-  controllers.UserResponse:
+  schemas.CreateUserSchema:
     properties:
-      id:
-        example: 1
-        type: integer
-      message:
-        example: User created successfully
+      about:
+        description: optional
         type: string
-      name:
-        example: Rajan
-        type: string
-    type: object
-  main.PingResponse:
-    properties:
-      message:
-        type: string
-    type: object
-  main.UserScrappResponse:
-    properties:
-      message:
-        type: string
-      userId:
-        type: string
-    type: object
-  models.User:
-    properties:
       email:
         type: string
-      firstName:
+      first_name:
         type: string
-      lastName:
+      last_name:
+        type: string
+      password:
+        minLength: 8
         type: string
       phone:
         type: string
+      role:
+        type: string
+    required:
+    - email
+    - first_name
+    - last_name
+    - password
+    - phone
+    - role
     type: object
-host: localhost:8090
+  schemas.GetUserResponse:
+    properties:
+      about:
+        example: Software developer
+        type: string
+      created_at:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+      email:
+        example: john.doe@example.com
+        type: string
+      first_name:
+        example: John
+        type: string
+      id:
+        example: 550e8400-e29b-41d4-a716-446655440000
+        type: string
+      last_name:
+        example: Doe
+        type: string
+      phone:
+        example: "+1234567890"
+        type: string
+      role:
+        example: General
+        type: string
+      updated_at:
+        example: "2023-01-01T00:00:00Z"
+        type: string
+    type: object
+  schemas.LoginResponse:
+    properties:
+      message:
+        example: Login successful
+        type: string
+      user:
+        $ref: '#/definitions/schemas.GetUserResponse'
+    type: object
+  schemas.LoginSchema:
+    properties:
+      email:
+        type: string
+      password:
+        type: string
+    required:
+    - email
+    - password
+    type: object
 info:
   contact: {}
-  description: This is the backend API for Scrapp application built with Gin
-  title: Scrapp Backend API
-  version: "1.0"
 paths:
+  /api/users:
+    get:
+      description: Fetches users from the system with pagination
+      parameters:
+      - default: 1
+        description: Page number
+        in: query
+        name: page
+        type: integer
+      - default: 50
+        description: Items per page
+        in: query
+        name: pageSize
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/schemas.GetUserResponse'
+            type: array
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get users
+      tags:
+      - Users
+  /api/users/{id}:
+    get:
+      description: Fetches a single user by their ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.GetUserResponse'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Get user by ID
+      tags:
+      - Users
+  /api/users/login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates a user with email and password
+      parameters:
+      - description: Login credentials
+        in: body
+        name: credentials
+        required: true
+        schema:
+          $ref: '#/definitions/schemas.LoginSchema'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/schemas.LoginResponse'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "401":
+          description: Unauthorized
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: User login
+      tags:
+      - Users
   /api/users/signup:
     post:
       consumes:
@@ -53,53 +178,29 @@ paths:
         name: user
         required: true
         schema:
-          $ref: '#/definitions/models.User'
+          $ref: '#/definitions/schemas.CreateUserSchema'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/controllers.UserResponse'
+            additionalProperties:
+              type: string
+            type: object
         "400":
           description: Bad Request
           schema:
             additionalProperties:
               type: string
             type: object
+        "500":
+          description: Internal Server Error
+          schema:
+            additionalProperties:
+              type: string
+            type: object
       summary: Create a new user
       tags:
-      - users
-  /ping:
-    get:
-      description: Returns pong to verify the API is running
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.PingResponse'
-      summary: Health check endpoint
-      tags:
-      - health
-  /scrapp/{userId}:
-    get:
-      description: Retrieves scrapp data for a specific user
-      parameters:
-      - description: User ID
-        in: path
-        name: userId
-        required: true
-        type: string
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/main.UserScrappResponse'
-      summary: Get user scrapp data
-      tags:
-      - scrapp
+      - Users
 swagger: "2.0"

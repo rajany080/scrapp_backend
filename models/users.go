@@ -13,6 +13,7 @@ type User struct {
 	LastName  string
 	Email     string `gorm:"uniqueIndex"`
 	Phone     string
+	Password  string `json:"-"` // Never expose password in JSON
 	About     string
 	Role      string
 	CreatedAt time.Time
