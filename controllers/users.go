@@ -5,6 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/rajany080/scrapp_backend/models"
+	"gorm.io/gorm"
 )
 
 type UserResponse struct {
@@ -23,23 +24,25 @@ type UserResponse struct {
 // @Success      200  {object}  UserResponse
 // @Failure      400  {object}  map[string]string
 // @Router       /api/users/signup [post]
-func CreateUserHandler(c *gin.Context) {
-	var user models.User
-	if err := c.ShouldBindJSON(&user); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
-		return
-	}
+func CreateUserHandler(db *gorm.DB) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		var user models.User
+		if err := c.ShouldBindJSON(&user); err != nil {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid request body"})
+			return
+		}
 
-	// Simple validation
-	if user.FirstName == "" || user.LastName == "" || user.Email == "" || user.Phone == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
-		return
-	}
+		// Simple validation
+		if user.FirstName == "" || user.LastName == "" || user.Email == "" || user.Phone == "" {
+			c.JSON(http.StatusBadRequest, gin.H{"error": "All fields are required"})
+			return
+		}
 
-	response := UserResponse{
-		ID:      1, // Example static ID
-		Name:    user.FirstName + " " + user.LastName,
-		Message: "User created successfully",
+		response := UserResponse{
+			ID:      1, // Example static ID
+			Name:    user.FirstName + " " + user.LastName,
+			Message: "User created successfully",
+		}
+		c.JSON(http.StatusOK, response)
 	}
-	c.JSON(http.StatusOK, response)
 }

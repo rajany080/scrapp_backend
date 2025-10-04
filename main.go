@@ -6,6 +6,7 @@ import (
 	"os"
 
 	_ "github.com/rajany080/scrapp_backend/docs" // docs folder import for swagger
+	"github.com/rajany080/scrapp_backend/models"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -41,6 +42,17 @@ func main() {
 	}
 	fmt.Println("Database connected!", db)
 
+	// Enable UUID extension
+	if err := db.Exec("CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\"").Error; err != nil {
+		log.Fatal("Failed to enable uuid-ossp extension: ", err)
+	}
+
+	if err := models.MigrateModels(db); err != nil {
+		log.Fatal("Failed to Migrate Database.")
+	}
+
+	log.Default().Print("Database migrated successfully!")
+
 	router := gin.Default()
 
 	// Swagger route
@@ -48,7 +60,7 @@ func main() {
 
 	// User routes
 	apiGroup := router.Group("/api")
-	routes.UserRoutes(apiGroup)
+	routes.UserRoutes(apiGroup, db)
 
 	// Start server on the configured port
 	serverAddr := ":" + port
